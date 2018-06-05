@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  nginx-wordpress:
+    image: nginx
+    container_name: nginx-wordpress
+    ports:
+      - 9090:80
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx.conf
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./:/opt/wordpress
+    depends_on:
+      - php-wordpress
+
+  php-wordpress:
+    build: ./docker/php-fpm
+    container_name: php-wordpress
+    volumes:
+      - ./:/opt/wordpress
+    working_dir: "/opt/wordpress"
+    depends_on:
+      - mysql-wordpress
+
+  mysql-wordpress:
+    image: mysql:5.7
+    container_name: mysql-wordpress
+    volumes:
+      - ./db:/var/lib/mysql
+    environment:
+      MYSQL_USER:                 root
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      MYSQL_DATABASE: wordpress
+    ports: 
+      - 3306:3306
